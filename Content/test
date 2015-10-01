@@ -1,0 +1,119 @@
+#include<bits/stdc++.h>
+#include<complex>
+using namespace std;
+
+const int MN = 1000;
+const double eps = 0.000001;
+typedef complex<double> point;
+point a[MN];
+int n;
+double r;
+point lineinpoint(point a, point b)
+{
+	double shib = (b.imag()-a.imag())/(b.real()-a.real());
+	point c(0,a.imag()+(0-a.real())*shib);
+	return c;
+}
+double cake ( double a, double b )
+{
+	double a1 = sqrt(r*r-a*a);
+	double b1 = sqrt(r*r-b*b);
+	double l = sqrt((a-b)*(a-b) + (a1-b1)*(a1-b1) );
+	l/=2;
+	return asin(l/r)*r*r-sqrt(r*r-l*l)*l;
+}
+double find( point a, point b )
+{
+	if ( a.real() > b.real() )
+		swap(a,b);
+	if ( a.real() > r )
+		return 0;
+	if ( b.real() < -r )
+		return 0;
+	if ( abs(a.real()-b.real()) < eps )
+		return 0;
+	if ( a.real() < 0 && b.real() > 0 )
+		return find(a,lineinpoint(a,b))+find(lineinpoint(a,b),b);
+	if ( a.real() < 0 )
+	{
+		a=point(-a.real(),a.imag());
+		b=point(-b.real(),b.imag());
+		swap(a,b);
+	}
+	double shib = (b.imag()-a.imag())/(b.real()-a.real());
+	double arz = lineinpoint(a,b).imag();
+	double a1 = shib*shib+1;
+	double b1 = 2*arz*shib;
+	double c1 = arz*arz-r*r;
+	double d = b1*b1 - 4*a1*c1;
+	vector<point> in;
+	if ( abs(d) < eps )
+	{
+		double x = -b1/(2*a1);
+		if ( x > a.real()+eps && x < b.real()-eps )
+		{
+			point temp (x,sqrt(abs(r*r-x*x)) );
+			in.push_back(temp);
+		}
+	}
+	else if ( d > eps )
+	{
+		double x = (-b1-sqrt(d))/(2*a1);
+		if ( x > a.real()+eps && x < b.real()-eps )
+		{
+			point temp (x,sqrt(abs(r*r-x*x)) );
+			in.push_back(temp);
+		}
+		x = (-b1+sqrt(d))/(2*a1);
+		if ( x > a.real()+eps && x < b.real()-eps )
+		{
+			point temp (x,sqrt(abs(r*r-x*x)) );
+			in.push_back(temp);
+		}
+	}
+	if ( in.size() == 0 )
+	{	
+		if (( a.imag() * a.imag() > r*r-a.real()*a.real()+eps*10000 ||  b.imag() * b.imag() > r*r-b.real()*b.real()+eps*10000 ) == 0){
+			return (b.real()-a.real())*(a.imag()+b.imag())/2;
+		}
+		else 	{
+			if ( a.real() > r )
+				a = point (r,a.imag());
+			if ( b.real() > r )
+				b = point (r,b.imag());
+
+			return (b.real()-a.real())*(sqrt(r*r-a.real()*a.real())+sqrt(r*r-b.real()*b.real()))/2+ cake(a.real(),b.real());
+		}
+	}
+	if ( in.size() == 1 )
+	{
+		return find(a,in[0])+find(in[0],b);
+	}
+	if ( in.size() == 2 )
+		return find (a,in[0])+find(in[0],in[1])+find(in[1],b);
+	return 0;
+
+}
+	double sign ( double a ){
+		if ( a < eps )
+			return -1;
+		return 1;
+	}
+
+int main()
+{
+	cin >> n >> r;
+	for ( int i = 0 ; i < n ; i++ )
+	{
+		double x,y;
+		cin >> x >> y;
+		a[i] = complex<double> (x,y);
+	}
+	double ans = 0;
+	for ( int i = 0 ; i < n ; i++ )
+		ans += abs(find ( a[i], a[(i+1)%n] ))*sign(a[i].real()-a[(i+1)%n].real());
+	cout << fixed << setprecision(10) << abs(ans) << endl;
+	return 0;
+}
+
+
